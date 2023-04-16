@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                           width: 300,
                           height: 300)
                   ),
-                  const Text("ANONYMITY", style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  const Text("Air Quality Detection System", style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   const SizedBox(height: 25),
                   Text("Welcome $displayUser !", style: const TextStyle(fontSize: 15, color: Colors.white, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
                   const SizedBox(height: 20),
