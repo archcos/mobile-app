@@ -111,16 +111,16 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.all(30),
                 children: [
                   ChangeColors(
-                      hue: 0.55,
                       brightness: 0.2,
                       saturation: 0.1,
                       child: Image.asset("assets/logo.png",
-                          width: 300,
-                          height: 300)
+                          width: 200,
+                          height: 200)
                   ),
+                  const SizedBox(height: 20),
                   const Text("Air Quality Detection System", style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   const SizedBox(height: 25),
-                  Text("Welcome $displayUser !", style: const TextStyle(fontSize: 15, color: Colors.white, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+                  Text("Welcome!", style: const TextStyle(fontSize: 15, color: Colors.white, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: emailController,
