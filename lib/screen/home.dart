@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
+import '../sbar/collapsible_sidebar.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   getUsers() async {
-    var url = 'https://test-api-3dsh.onrender.com/users';
+    var url = 'http://test-api-3dsh.onrender.com/users';
     var response = await http.get(Uri.parse(url));
 
     setState(() {
@@ -76,8 +77,12 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          // drawer: NavBar(data: widget.data),
-          body: ListView()
+          drawer: NavBar(data: widget.data),
+          body: ListView(
+            children: [
+              Text('${users.length}')
+            ],
+          )
         )
     );
   }

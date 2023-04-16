@@ -61,17 +61,19 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() {
       accounts = convert.jsonDecode(response.body) as List<dynamic>;
+
     });
   }
 
   Future loginData() async {
-    var username = emailController.text;
+    var email = emailController.text;
     var password = passwordController.text;
-
+    print("length ${accounts.length}");
     for (var i = 0; i <= accounts.length; i++) {
-      if (username == accounts[i]['username'] &&
+      if (email == accounts[i]['email'] &&
           password == accounts[i]['password']) {
         _showMsg('Login Success');
+        print(accounts.length);
         account.add(accounts[i]);
         await Navigator.push(
             context,
@@ -150,6 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                   ElevatedButton(
                       onPressed: () {
                         loginData();
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(data: account)));
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.greenAccent
