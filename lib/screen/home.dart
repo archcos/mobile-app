@@ -1,89 +1,97 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' as convert;
-import '../sbar/collapsible_sidebar.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
+import '../auth/Auth_services.dart';
+import 'login_page.dart';
 
-  final List data;
-  const HomePage({
-    required this.data,
-    Key? key}) : super(key: key);
-
+class HomeScreen extends StatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
-
-
-  List posts = <dynamic>[];
-  List users = <dynamic>[];
-  int postId = 0;
-  int currentIndex = 0;
-  List account = <dynamic>[];
+class _HomeScreenState extends State<HomeScreen> {
+  final storage = new FlutterSecureStorage();
 
   @override
   void initState() {
-    getUsers();
     super.initState();
+    readToken();
   }
 
-  getUsers() async {
-    var url = 'http://test-api-3dsh.onrender.com/users';
-    var response = await http.get(Uri.parse(url));
-
-    setState(() {
-      users = convert.jsonDecode(response.body) as List<dynamic>;
-    });
-  }
-
-  getUser() async {
-    for (int i = 0; i <= users.length; i++) {
-      if (widget.data == users[i]['id']) {
-        setState(() {
-          currentIndex = i;
-        });
-        break;
-      }
-    }
+  void readToken() async {
+    String token = await storage.read(key: 'token');
+    Provider.of<Auth>(context, listen: false).tryToken(token: token);
+    print(token);
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Search",
-                        hintStyle: TextStyle(
-                          color: Colors.white54,
-                        ),
-                        icon: Icon(
-                          Icons.search,
-                          color: Colors.white54,
-                        )
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Air Quality Detection System'),
+      ),
+      body: Center(
+        child: Text('Home Sceen'),
+      ),
+      drawer: Drawer(
+        child: Consumer<Auth>(
+          builder: (context, auth, child) {
+            if (!auth.authenticated) {
+              return ListView(
+                children: [
+                  DrawerHeader(
+                    child: Text('Please login'),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
                     ),
                   ),
-                )
-              ],
-            ),
-          ),
-          drawer: NavBar(data: widget.data),
-          body: ListView(
-            children: [
-              Text('${users.length}')
-            ],
-          )
-        )
+                ],
+              );
+            } else {
+              return ListView(
+                children: [
+                  DrawerHeader(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          backgroundImage: auth.user.avatar != null &&
+                              Uri.parse(auth.user.avatar).isAbsolute
+                              ? NetworkImage(auth.user.avatar)
+                              : null,
+                          radius: 30,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          auth.user.name,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          auth.user.email,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('Logout'),
+                    leading: Icon(Icons.logout),
+                    onTap: () {Provider.of<Auth>(context, listen: false).logout();
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => LoginPage()));
+                    },
+                  ),
+                ],
+              );
+            }
+          },
+        ),
+      ),
     );
   }
 }
