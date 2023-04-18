@@ -23,10 +23,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Air Quality Detection System',
       theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-      ),
-      darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
       ),

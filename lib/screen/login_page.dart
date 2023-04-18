@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobileint/screen/OTPscreen.dart';
 import 'package:provider/provider.dart';
 import 'package:themed/themed.dart';
 import '../auth/Auth_services.dart';
@@ -108,73 +109,78 @@ class _LoginPageState extends State<LoginPage> {
 
   void RegisterPage() async {
     return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            scrollable: true,
-            title: const Text('Create Account'),
-            content: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Form(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(
-                          labelText: "Full Name"),
-                      validator: (value){
-                        return (value == '')? "Input Full Name" : null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _passwordController,
-                      keyboardType: TextInputType.name,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                          labelText: "Password"),
-                      validator: (value){
-                        return (value == '')? "Input Password" : null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                          labelText: "Email Address"),
-                      validator: (value){
-                        return (value == '')? "Input Email Address" : null;
-                      },
-                    ),
-                  ],
-                ),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          scrollable: true,
+          title: const Text('Create Account'),
+          content: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Form(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                        labelText: "Full Name"),
+                    validator: (value){
+                      return (value == '')? "Input Full Name" : null;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _passwordController,
+                    keyboardType: TextInputType.name,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                        labelText: "Password"),
+                    validator: (value){
+                      return (value == '')? "Input Password" : null;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                        labelText: "Email Address"),
+                    validator: (value){
+                      return (value == '')? "Input Email Address" : null;
+                    },
+                  ),
+                ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Map creds = {
-                    'name' : _nameController.text,
-                    'email': _emailController.text,
-                    'password': _passwordController.text,
-                    'device_name': 'mobile',
-                  };
-                  if (_formKey.currentState!.validate()) {
-                    Provider.of<Auth>(context, listen: false).register(creds: creds);
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Center(
-                  child: Text("Sign Up"),
-                ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Map creds = {
+                  'name' : _nameController.text,
+                  'email': _emailController.text,
+                  'password': _passwordController.text,
+                  'device_name': 'mobile',
+                };
+                if (_formKey.currentState!.validate()) {
+                  String token = await Provider.of<Auth>(context, listen: false).register(creds: creds);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => OTPscreen(email: _emailController.text, token: token),
+                    ),
+                  );
+                }
+              },
+              child: const Center(
+                child: Text("Sign Up"),
               ),
-            ],
-          );
-        }
+            ),
+          ],
+        );
+      },
     );
   }
+
 }

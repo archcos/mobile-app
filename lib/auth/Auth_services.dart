@@ -1,6 +1,9 @@
-import 'package:dio/dio.dart' as Dio;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:http/http.dart' as http;
+
 
 import '../models/user.dart';
 import 'Dio.dart';
@@ -19,35 +22,49 @@ class Auth extends ChangeNotifier {
     print(creds);
 
     try {
-      Dio.Response response = await dio().post('/sanctum/login', data: creds);
-      print(response.data.toString());
+      final response = await http.post(Uri.parse('https://example.com/sanctum/login'),
+          body: creds,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'});
 
-      String token = response.data.toString();
-      this.tryToken(token: token);
+      final contentType = MediaType.parse(response.headers['content-type'] ?? '');
+      if (contentType.type == 'application' && contentType.subtype == 'json') {
+        final token = response.body;
+        this.tryToken(token: token);
+      } else {
+        print('Unexpected response content type: ${contentType.toString()}');
+      }
     } catch (e) {
       print(e);
     }
   }
 
 
-  void register({required Map creds}) async {
+  Future register({required Map creds}) async {
     print(creds);
 
     try {
-      Dio.Response response = await dio().post('/sanctum/register', data: creds);
-      print(response.data.toString());
+      final response = await http.post(Uri.parse('https://example.com/sanctum/register'),
+          body: creds,
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'});
 
-      String token = response.data.toString();
-      this.tryToken(token: token);
+      final contentType = MediaType.parse(response.headers['content-type'] ?? '');
+      if (contentType.type == 'application' && contentType.subtype == 'json') {
+        final token = response.body;
+        this.tryToken(token: token);
+      } else {
+        print('Unexpected response content type: ${contentType.toString()}');
+      }
     } catch (e) {
-      if (e is Dio.DioError) {
-        if (e.response?.statusCode == 422) {
-          print(e.response?.data);
+      if (e is http.ClientException) {
+        print(e.message);
+      } else if (e is http.Response) {
+        if (e.statusCode == 422) {
+          print(e.body);
         } else {
-          print(e);
+          print('HTTP error ${e.statusCode}');
         }
       } else {
-        print(e);
+        print(e.toString());
       }
     }
   }
@@ -57,14 +74,18 @@ class Auth extends ChangeNotifier {
       return;
     } else {
       try {
-        Dio.Response response = await dio().get('/user',
-            options: Dio.Options(headers: {'Authorization': 'Bearer $token'}));
-        this._isLoggedIn = true;
-        this._user = User.fromJson(response.data);
-        this._token = token;
-        this.storeToken(token: token);
-        notifyListeners();
-        print(_user);
+        http.Response response = await http.get(Uri.parse('https://example.com/user'),
+            headers: {'Authorization': 'Bearer $token'});
+        if (response.statusCode == 200) {
+          this._isLoggedIn = true;
+          this._user = User.fromJson(json.decode(response.body));
+          this._token = token;
+          this.storeToken(token: token);
+          notifyListeners();
+          print(_user);
+        } else {
+          print('Error: ${response.statusCode}');
+        }
       } catch (e) {
         print(e);
       }
@@ -77,17 +98,19 @@ class Auth extends ChangeNotifier {
 
   void logout() async {
     try {
-      Dio.Response response = await dio().get('/user/revoke',
-          options: Dio.Options(headers: {'Authorization': 'Bearer $_token'}));
-
-      await cleanUp();
-      notifyListeners();
+      http.Response response = await http.post(Uri.parse('https://example.com/sanctum/revoke'));
+      if (response.statusCode == 200) {
+        String token = response.body;
+        this.tryToken(token: token);
+      } else {
+        print('Error: ${response.statusCode}');
+      }
     } catch (e) {
       print(e);
     }
   }
 
-   cleanUp() async {
+  cleanUp() async {
     this._user = User();
     this._isLoggedIn = false;
     this._token = '';
